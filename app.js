@@ -17,8 +17,16 @@ function handler(req, res){
         }
     );
 };
+
+// socket.io 셋팅
+io.configure(function(){
+    io.set('transports', ['xhr-polling']);
+    io.set('polling duration', 10);
+    io.set('log level', 2);
+});
+
 var socketRoom = {};
-io.set('log level', 2);
+
 io.sockets.on('connection', function(socket){
     // 접속완료를 알림.
     socket.emit('connected');
