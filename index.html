@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>socketio redis store</title>
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+        var socket = io.connect('http://<%=host%>');
+        
+        $(document).ready(function(){
+            socket.on('connected', function(){
+                console.log('connected');
+            });
+            
+            // 매칭완료되었을 때
+            socket.on('completeMatch', function(data){
+                console.log('completeMatch!');
+                $('.lobby').hide();
+                $('.wait').hide();
+                $('.chat').show();
+            });
+            
+            // 대화를 받았을 때
+            socket.on('receiveMessage', function(data){
+                $('.chatResult').append('<li>' + data.message + '</li>');
+            });
+            // 상대방이 나갔을 때 나도 같이 로비로 나감.
+            socket.on('disconnect', function(data){
+                console.log('disconnect');
+                $('.lobby').show();
+                $('.chat').hide();
+            });
+            
+            // 랜덤요청 시
+            $('#btnRequestRandomChat').click(function(){
+                $('.lobby').hide();
+                $('.wait').show();
+                socket.emit('requestRandomChat');
+            });
+            
+            // 요청 취소 시
+            $('#btnCancelRequest').click(function(){
+                $('.lobby').show();
+                $('.wait').hide();
+                $('.chat').hide();
+                socket.emit('cancelRequest');
+            });
+            
+            // 엔터입력 시
+            $('#inputMessage').keyup(function(e){
+                if (e.keyCode == 13){
+                    send();
+                }
+            });
+            // 채팅 내용 전송 시
+            $('#btnChat').click(function(){
+                send();
+            });
+        });
+        
+        function send(){
+            var message = $('#inputMessage').val();
+            if (message.length < 1){
+                alert('내용을 입력하세요.');
+                return;
+            }
+            socket.emit('sendMessage', {message:message});
+            $('#inputMessage').val('');
+        }
+    </script>
+</head>
+<body>
+    <div class="lobby container">
+        <button id="btnRequestRandomChat" class="btn">채팅입장</button>
+    </div>
+    <div class="wait container" style="display:none">
+        <div>상대방을 기다리는 중...</div>
+        <button id="btnCancelRequest" class="btn">취소</button>
+    </div>
+    <div class="chat container" style="display:none">
+        <input type="text" id="inputMessage" class="input-medium search-query" />
+        <button type="submit" id="btnChat" class="btn">전송</button>
+        <ul class="chatResult">
+        </ul>
+    </div>
+</body>
+</html>
