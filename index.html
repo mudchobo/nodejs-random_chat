@@ -24,7 +24,7 @@
             
             // 대화를 받았을 때
             socket.on('receiveMessage', function(data){
-                $('.chatResult').append('<li>' + data.message + '</li>');
+                $('.chatResult').prepend('<li>' + data.message + '</li>');
             });
             // 상대방이 나갔을 때 나도 같이 로비로 나감.
             socket.on('disconnect', function(data){
